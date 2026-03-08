@@ -1,14 +1,2 @@
-# Python
-backend/.venv/
-backend/.env
-__pycache__/
-*.pyc
-.pytest_cache/
-
-# Node
-frontend/node_modules/
-frontend/.env.local
-frontend/.next/
-
-# OS
-.DS_Store
+#env
+.env
