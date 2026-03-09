@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/jasparmetzger-dev/agora/internal/database"
-	"github.com/joho/godotenv"
 )
 
 func LoginHandler(q *db.Queries) gin.HandlerFunc {
@@ -34,11 +33,6 @@ func LoginHandler(q *db.Queries) gin.HandlerFunc {
 }
 
 func login(username, password string, ctx context.Context, q *db.Queries) (string, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return "", err
-	}
-
 	//verify user
 	user, err := q.GetUserByUsername(ctx, username)
 	if err != nil {

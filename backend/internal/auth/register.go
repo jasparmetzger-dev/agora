@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/jasparmetzger-dev/agora/internal/database"
-	"github.com/joho/godotenv"
 )
 
 func RegisterHandler(q *db.Queries) gin.HandlerFunc {
@@ -32,13 +31,8 @@ func RegisterHandler(q *db.Queries) gin.HandlerFunc {
 	}
 }
 func register(username, email, password string, ctx context.Context, q *db.Queries) (string, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return "", err
-	}
-
 	// Check if the username already exists
-	_, err = q.GetUserByUsername(ctx, username)
+	_, err := q.GetUserByUsername(ctx, username)
 	if err == nil {
 		return "", errors.New("username already exists")
 	}

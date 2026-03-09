@@ -7,11 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jasparmetzger-dev/agora/internal/auth"
 	"github.com/jasparmetzger-dev/agora/internal/database"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	godotenv.Load()
 
 	//init db
 	db, err := database.NewPool(os.Getenv("DATABASE_URL"))
@@ -23,6 +21,8 @@ func main() {
 
 	//init gin routing
 	var r *gin.Engine = gin.Default()
+	r.SetTrustedProxies(nil)
+
 	r.POST("/register", auth.RegisterHandler(q))
 	r.POST("/login", auth.LoginHandler(q))
 
