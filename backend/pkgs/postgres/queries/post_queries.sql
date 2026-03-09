@@ -50,7 +50,7 @@ FROM posts
 ORDER BY created_at DESC
 LIMIT $1;
 
--- name:  CountPosts :one
+-- name: CountPosts :one
 SELECT COUNT(*) AS count
 FROM posts;
 
