@@ -27,8 +27,17 @@ func main() {
 	r.POST("/login", auth.LoginHandler(q))
 
 	var authorized *gin.RouterGroup = r.Group("/")
-	authorized.Use()
+	authorized.Use(auth.AuthMiddleware())
 	{
+		authorized.PATCH("/profile", UpdateProfileHandler(q))
+		authorized.GET("/profile", GetProfileHandler(q))
+
+		authorized.POST("/posts", CreatePostHandler(q))
+		authorized.GET("/posts", GetAllPostsHandler(q))
+		authorized.PATCH("/posts/:id", PatchPostHandler(q))
+		authorized.DELETE("/posts/:id", DeletePostHandler(q))
+
+		authorized.GET("/feed", FeedHandler(q))
 
 	}
 
