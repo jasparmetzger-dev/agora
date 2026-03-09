@@ -22,9 +22,9 @@ func RegisterHandler(c *gin.Context, q *db.Queries) {
 		return
 	}
 
-	token, err := register(req.Username, req.Email, req.Password, context.Background(), q)
+	token, err := register(req.Username, req.Email, req.Password, c.Request.Context(), q)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error(), "message": "registering didnt work"})
+		c.JSON(401, gin.H{"error": err.Error(), "message": "registering didnt work"})
 		return
 	}
 	c.JSON(200, gin.H{"token": token})
@@ -62,7 +62,7 @@ func register(username, email, password string, ctx context.Context, q *db.Queri
 		return "", err
 	}
 
-	//generate jwt
+	//generate token
 	token, err := GenerateJWT(user.ID.String(), os.Getenv("SECRET_KEY"))
 	if err != nil {
 		return "", err
