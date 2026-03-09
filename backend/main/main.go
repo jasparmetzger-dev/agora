@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -18,6 +19,7 @@ func main() {
 	}
 	defer db.Close()
 	//init database query
-	//q := database.New(db)
+	var q *database.Queries = database.New(db)
+	var ctx context.Context = context.Background()
 
 }
