@@ -1,5 +1,6 @@
 package auth
 
-func Login(username, password string) (string, error) {
-
+func login(username, password string) (string, error) {
+	//IMPLEMENT!!
+	return "", nil
 }
