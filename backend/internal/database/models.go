@@ -5,26 +5,24 @@
 package database
 
 import (
-	"database/sql"
-
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Post struct {
-	ID        uuid.UUID
-	Url       sql.NullString
-	UserID    uuid.UUID
+	ID        pgtype.UUID
+	Url       pgtype.Text
+	UserID    pgtype.UUID
 	Title     string
 	Content   string
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
 
 type User struct {
-	ID           uuid.UUID
+	ID           pgtype.UUID
 	Username     string
 	Email        string
 	PasswordHash string
-	CreatedAt    sql.NullTime
-	UpdatedAt    sql.NullTime
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
 }

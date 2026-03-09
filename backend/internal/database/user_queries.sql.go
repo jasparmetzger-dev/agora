@@ -8,7 +8,7 @@ package database
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const countUsers = `-- name: CountUsers :one
@@ -17,7 +17,7 @@ FROM users
 `
 
 func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countUsers)
+	row := q.db.QueryRow(ctx, countUsers)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -30,14 +30,14 @@ RETURNING id, username, email, password_hash, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	ID           uuid.UUID
+	ID           pgtype.UUID
 	Username     string
 	Email        string
 	PasswordHash string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
+	row := q.db.QueryRow(ctx, createUser,
 		arg.ID,
 		arg.Username,
 		arg.Email,
@@ -61,8 +61,8 @@ WHERE id = $1
 RETURNING id, username, email, password_hash, created_at, updated_at
 `
 
-func (q *Queries) DeleteUserById(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.db.QueryRowContext(ctx, deleteUserById, id)
+func (q *Queries) DeleteUserById(ctx context.Context, id pgtype.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, deleteUserById, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -82,7 +82,7 @@ WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -101,8 +101,8 @@ FROM users
 WHERE id = $1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
+func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserById, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -122,7 +122,7 @@ WHERE username = $1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -143,7 +143,7 @@ LIMIT $1
 `
 
 func (q *Queries) ListNUsers(ctx context.Context, limit int32) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listNUsers, limit)
+	rows, err := q.db.Query(ctx, listNUsers, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -162,9 +162,6 @@ func (q *Queries) ListNUsers(ctx context.Context, limit int32) ([]User, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -179,7 +176,7 @@ ORDER BY created_at DESC
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listUsers)
+	rows, err := q.db.Query(ctx, listUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -198,9 +195,6 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -216,14 +210,14 @@ RETURNING id, username, email, password_hash, created_at, updated_at
 `
 
 type UpdateUserByIdParams struct {
-	ID           uuid.UUID
+	ID           pgtype.UUID
 	Username     string
 	Email        string
 	PasswordHash string
 }
 
 func (q *Queries) UpdateUserById(ctx context.Context, arg UpdateUserByIdParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUserById,
+	row := q.db.QueryRow(ctx, updateUserById,
 		arg.ID,
 		arg.Username,
 		arg.Email,

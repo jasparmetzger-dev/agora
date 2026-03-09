@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/jasparmetzger-dev/agora/pkgs/database"
+	"github.com/jasparmetzger-dev/agora/internal/database"
 	"github.com/joho/godotenv"
 )
 
@@ -17,5 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
+	//init database query
+	//q := database.New(db)
 
 }
