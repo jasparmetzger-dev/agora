@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jasparmetzger-dev/agora/internal/api"
 	"github.com/jasparmetzger-dev/agora/internal/auth"
 	"github.com/jasparmetzger-dev/agora/internal/database"
 )
@@ -29,8 +30,8 @@ func main() {
 	var authorized *gin.RouterGroup = r.Group("/")
 	authorized.Use(auth.AuthMiddleware())
 	{
-		authorized.PATCH("/profile", UpdateProfileHandler(q))
-		authorized.GET("/profile", GetProfileHandler(q))
+		authorized.PATCH("/profile", api.UpdateProfileHandler(q))
+		authorized.GET("/profile", api.GetProfileHandler(q))
 
 		authorized.POST("/posts", CreatePostHandler(q))
 		authorized.GET("/posts", GetAllPostsHandler(q))
