@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -49,13 +50,26 @@ func UpdateProfileHandler(q *db.Queries) gin.HandlerFunc {
 		if req.Username != "" {
 			user.Username = req.Username
 		}
-		q.UpdateUserById(c, user)
+
+		params := db.UpdateUserByIdParams{}
+		params.ID = user.ID
+		params.Username = user.Username
+		params.Email = user.Email
+		params.PasswordHash = user.PasswordHash
+
+		new_user, err := q.UpdateUserById(c, params)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
+
+		//return
+		c.JSON(200, gin.H{"message": "successfully updated user", "user": new_user})
 	}
 }
 
 // PATCH, "/profile/changepassword"
 func ChangePasswordHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
+		log.Fatal("not implemented")
 	}
 }
