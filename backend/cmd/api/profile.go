@@ -1,22 +1,19 @@
 package api
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	db "github.com/jasparmetzger-dev/agora/internal/database"
+	"github.com/jasparmetzger-dev/agora/cmd/auth"
+	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
 
 // GET, "/profile"
 func GetProfileHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := ValidateUUID(c)
+		user, err, status := MakeUserFromHeader(q, c)
 		if err != nil {
-			c.JSON(401, gin.H{"error": err})
+			c.JSON(status, gin.H{"error": err.Error()})
 		}
-		user, err := q.GetUserById(c, id)
-		c.JSON(http.StatusOK, gin.H{"user": user})
+		c.JSON(200, gin.H{"user": user})
 	}
 }
 
@@ -34,13 +31,9 @@ func UpdateProfileHandler(q *db.Queries) gin.HandlerFunc {
 		}
 
 		//get user
-		id, err := ValidateUUID(c)
+		user, err, status := MakeUserFromHeader(q, c)
 		if err != nil {
-			c.JSON(401, gin.H{"error": err.Error()})
-		}
-		user, err := q.GetUserById(c, id)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
+			c.JSON(status, gin.H{"error": err.Error()})
 		}
 
 		//update user
@@ -51,13 +44,7 @@ func UpdateProfileHandler(q *db.Queries) gin.HandlerFunc {
 			user.Username = req.Username
 		}
 
-		params := db.UpdateUserByIdParams{}
-		params.ID = user.ID
-		params.Username = user.Username
-		params.Email = user.Email
-		params.PasswordHash = user.PasswordHash
-
-		new_user, err := q.UpdateUserById(c, params)
+		new_user, err := UserUpdateHelper(q, c, user)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 		}
@@ -68,8 +55,38 @@ func UpdateProfileHandler(q *db.Queries) gin.HandlerFunc {
 }
 
 // PATCH, "/profile/changepassword"
+// PASSWORD LENGTH CHECK??
 func ChangePasswordHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Fatal("not implemented")
+		//validate req
+		var req struct {
+			OldPassword string `json:"old_password"`
+			NewPassword string `json:"new_password"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		//get user
+		user, err, status := MakeUserFromHeader(q, c)
+		if err != nil {
+			c.JSON(status, gin.H{"error": err.Error()})
+		}
+		//validate passwords
+		if !auth.CheckPasswordHash(req.OldPassword, user.PasswordHash) {
+			c.JSON(401, gin.H{"error": "invalid old_password, must match the set password"})
+		}
+		//check pwd-requirements here
+		//...
+		//set new password
+		user.PasswordHash, err = auth.HashPassword(req.NewPassword)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error(), "message": "new password could not be assigned"})
+		}
+		new_user, err := UserUpdateHelper(q, c, user)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error(), "message": "user could not be updated"})
+		}
+		c.JSON(200, gin.H{"user": new_user, "message": "updated password successfully"})
 	}
 }

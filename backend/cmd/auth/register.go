@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/jasparmetzger-dev/agora/internal/database"
+	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
 
 func RegisterHandler(q *db.Queries) gin.HandlerFunc {

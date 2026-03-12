@@ -9,7 +9,7 @@ SELECT id, url, title, content, user_id, created_at, updated_at
 FROM posts
 WHERE id = $1;
 
--- name: getPostByUrl :one
+-- name: GetPostByUrl :one
 SELECT id, url, title, content, user_id, created_at, updated_at
 FROM posts
 WHERE url = $1;

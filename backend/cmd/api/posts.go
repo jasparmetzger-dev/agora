@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/jasparmetzger-dev/agora/internal/database"
+	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
 
 // POST, "/posts", requires auth

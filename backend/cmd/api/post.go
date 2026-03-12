@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/jasparmetzger-dev/agora/internal/database"
+	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
 
 // PATCH, "posts/:id", auth required
