@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ─── Config ────────────────────────────────────────────────────────────────────
-DB_URL="${DATABASE_URL:-postgresql://postgres:2319@localhost:5432?sslmode=disable}"
+DB_URL="${DATABASE_URL:-postgresql://postgres:2319@localhost:5432/agora?sslmode=disable}"
 MIGRATIONS_DIR="${MIGRATIONS_DIR:-./cmd/database/migrations}"
 SQLC_CONFIG="${SQLC_CONFIG:-./sqlc.yaml}"
 
