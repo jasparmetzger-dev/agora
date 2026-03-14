@@ -1,8 +1,6 @@
 package api
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/jasparmetzger-dev/agora/cmd/database"
@@ -67,6 +65,6 @@ func GetAllPostsHandler(q *db.Queries) gin.HandlerFunc {
 
 // the saving logic
 func saveVideo(video []byte) (pgtype.Text, error) { //returns url
-	log.Fatal("not implemented")
+	////not immplemented!!!!
 	return pgtype.Text{}, nil
 }

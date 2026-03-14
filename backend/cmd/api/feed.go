@@ -1,8 +1,6 @@
 package api
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
@@ -10,6 +8,6 @@ import (
 // GET, "/feed", auth required
 func ShowFeedHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Fatal()
+		c.JSON(500, gin.H{"error": "not implemented."})
 	}
 }
