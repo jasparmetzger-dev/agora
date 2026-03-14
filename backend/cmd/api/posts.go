@@ -28,6 +28,7 @@ func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 		userId, err := ValidateUUID(c)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
 
 		//create post
@@ -40,6 +41,7 @@ func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 		created_post, err := q.CreatePost(c, params)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(200, gin.H{"message": "post created successfully", "post": created_post})
 	}
@@ -51,11 +53,13 @@ func GetAllPostsHandler(q *db.Queries) gin.HandlerFunc {
 		userId, err := ValidateUUID(c)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
 
 		posts, err := q.GetPostsByUserId(c, userId)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(200, gin.H{"message": "fetching posts successful", "posts": posts})
 	}

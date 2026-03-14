@@ -12,6 +12,7 @@ func GetProfileHandler(q *db.Queries) gin.HandlerFunc {
 		user, err, status := MakeUserFromHeader(q, c)
 		if err != nil {
 			c.JSON(status, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(200, gin.H{"user": user})
 	}
@@ -73,10 +74,12 @@ func ChangePasswordHandler(q *db.Queries) gin.HandlerFunc {
 		user, err, status := MakeUserFromHeader(q, c)
 		if err != nil {
 			c.JSON(status, gin.H{"error": err.Error()})
+			return
 		}
 		//validate passwords
 		if !auth.CheckPasswordHash(req.OldPassword, user.PasswordHash) {
 			c.JSON(401, gin.H{"error": "invalid old_password, must match the set password"})
+			return
 		}
 		//check pwd-requirements here
 		//...
@@ -84,10 +87,12 @@ func ChangePasswordHandler(q *db.Queries) gin.HandlerFunc {
 		user.PasswordHash, err = auth.HashPassword(req.NewPassword)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error(), "message": "new password could not be assigned"})
+			return
 		}
 		new_user, err := UserUpdateHelper(q, c, user)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error(), "message": "user could not be updated"})
+			return
 		}
 		c.JSON(200, gin.H{"user": new_user, "message": "updated password successfully"})
 	}
