@@ -11,17 +11,19 @@ import (
 // POST, "/posts", requires auth
 func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		//validate and get data
 		var req struct {
-			Url     pgtype.Text `json:"url"`
-			Title   string      `json:"title"`
-			Content string      `json:"content"`
+			Video   []byte `json:"video"` //whatever the actual video is
+			Title   string `json:"title"`
+			Content string `json:"content"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+
+		//create url and save the image
+		url, err := saveVideo(req.Video)
 
 		userId, err := ValidateUUID(c)
 		if err != nil {
@@ -30,7 +32,7 @@ func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 
 		//create post
 		params := db.CreatePostParams{}
-		params.Url = req.Url
+		params.Url = url
 		params.Title = req.Title
 		params.Content = req.Content
 		params.UserID = userId
@@ -40,18 +42,27 @@ func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 			c.JSON(500, gin.H{"error": err.Error()})
 		}
 		c.JSON(200, gin.H{"message": "post created successfully", "post": created_post})
-
 	}
 }
 
 // GET, "/posts", requires auth
 func GetAllPostsHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Fatal()
+		userId, err := ValidateUUID(c)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
+
+		posts, err := q.GetPostsByUserId(c, userId)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
+		c.JSON(200, gin.H{"message": "fetching posts successful", "posts": posts})
 	}
 }
 
-// just logic
-func postPost(post db.Post) {
+// the saving logic
+func saveVideo(video []byte) (pgtype.Text, error) { //returns url
 	log.Fatal("not implemented")
+	return pgtype.Text{}, nil
 }

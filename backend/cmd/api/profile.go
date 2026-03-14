@@ -34,6 +34,7 @@ func UpdateProfileHandler(q *db.Queries) gin.HandlerFunc {
 		user, err, status := MakeUserFromHeader(q, c)
 		if err != nil {
 			c.JSON(status, gin.H{"error": err.Error()})
+			return
 		}
 
 		//update user
@@ -47,6 +48,7 @@ func UpdateProfileHandler(q *db.Queries) gin.HandlerFunc {
 		new_user, err := UserUpdateHelper(q, c, user)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
 
 		//return

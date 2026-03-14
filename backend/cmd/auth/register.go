@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"errors"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,7 @@ func RegisterHandler(q *db.Queries) gin.HandlerFunc {
 			return
 		}
 
-		token, err := register(req.Username, req.Email, req.Password, c.Request.Context(), q)
+		token, err := register(req.Username, req.Email, req.Password, c, q)
 		if err != nil {
 			c.JSON(401, gin.H{"error": err.Error(), "message": "registering didnt work"})
 			return
@@ -29,9 +28,9 @@ func RegisterHandler(q *db.Queries) gin.HandlerFunc {
 		c.JSON(200, gin.H{"token": token})
 	}
 }
-func register(username, email, password string, ctx context.Context, q *db.Queries) (string, error) {
+func register(username, email, password string, c *gin.Context, q *db.Queries) (string, error) {
 	// Check if the username already exists
-	_, err := q.GetUserByUsername(ctx, username)
+	_, err := q.GetUserByUsername(c, username)
 	if err == nil {
 		return "", errors.New("username already exists")
 	}
@@ -46,13 +45,13 @@ func register(username, email, password string, ctx context.Context, q *db.Queri
 		Email:        email,
 		PasswordHash: hashedPassword,
 	}
-	_, err = q.CreateUser(ctx, params)
+	_, err = q.CreateUser(c, params)
 	if err != nil {
 		return "", err
 	}
 
 	//get user id
-	user, err := q.GetUserByUsername(ctx, username)
+	user, err := q.GetUserByUsername(c, username)
 	if err != nil {
 		return "", err
 	}
