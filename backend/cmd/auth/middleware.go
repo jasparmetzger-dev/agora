@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"os"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jasparmetzger-dev/agora/conf"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -31,7 +30,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
-			return []byte(os.Getenv("SECRET_KEY")), nil
+			return []byte(conf.SECRET_KEY), nil
 		})
 
 		if err != nil || !token.Valid {

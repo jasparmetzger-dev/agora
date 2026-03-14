@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"os"
-
 	"github.com/gin-gonic/gin"
 	db "github.com/jasparmetzger-dev/agora/cmd/database"
+	"github.com/jasparmetzger-dev/agora/conf"
 )
 
 func LoginHandler(q *db.Queries) gin.HandlerFunc {
@@ -43,7 +42,7 @@ func login(username, password string, ctx context.Context, q *db.Queries) (strin
 	}
 
 	//generate token
-	token, err := GenerateJWT(user.ID.String(), os.Getenv("SECRET_KEY"))
+	token, err := GenerateJWT(user.ID.String(), conf.SECRET_KEY)
 	if err != nil {
 		return "", err
 	}

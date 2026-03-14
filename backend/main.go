@@ -2,18 +2,18 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jasparmetzger-dev/agora/internal/api"
-	"github.com/jasparmetzger-dev/agora/internal/auth"
-	"github.com/jasparmetzger-dev/agora/internal/database"
+	"github.com/jasparmetzger-dev/agora/cmd/api"
+	"github.com/jasparmetzger-dev/agora/cmd/auth"
+	"github.com/jasparmetzger-dev/agora/cmd/database"
+	"github.com/jasparmetzger-dev/agora/conf"
 )
 
 func main() {
 
 	//init db
-	db, err := database.NewPool(os.Getenv("DATABASE_URL"))
+	db, err := database.NewPool(conf.DATABASE_URL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,6 +27,7 @@ func main() {
 	r.POST("/register", auth.RegisterHandler(q))
 	r.POST("/login", auth.LoginHandler(q))
 
+	//user routing
 	var authorized *gin.RouterGroup = r.Group("/")
 	authorized.Use(auth.AuthMiddleware())
 	{
@@ -44,5 +45,5 @@ func main() {
 
 	}
 
-	r.Run(os.Getenv("BACKEND_PORT"))
+	r.Run(conf.BACKEND_PORT)
 }
