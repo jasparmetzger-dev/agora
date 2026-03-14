@@ -37,44 +37,34 @@ func (q *Queries) CountPostsByUserId(ctx context.Context, userID pgtype.UUID) (i
 }
 
 const createPost = `-- name: CreatePost :one
-INSERT INTO posts (id, url,title, content, user_id, created_at, updated_at)
+INSERT INTO posts (id, url, user_id, title, content, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-RETURNING id, url, title, content, user_id, created_at, updated_at
+RETURNING id, url, user_id, title, content, created_at, updated_at
 `
 
 type CreatePostParams struct {
 	ID      pgtype.UUID
 	Url     pgtype.Text
+	UserID  pgtype.UUID
 	Title   string
 	Content string
-	UserID  pgtype.UUID
 }
 
-type CreatePostRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreatePostRow, error) {
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
 	row := q.db.QueryRow(ctx, createPost,
 		arg.ID,
 		arg.Url,
+		arg.UserID,
 		arg.Title,
 		arg.Content,
-		arg.UserID,
 	)
-	var i CreatePostRow
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Url,
+		&i.UserID,
 		&i.Title,
 		&i.Content,
-		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -84,28 +74,18 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreateP
 const deletePostById = `-- name: DeletePostById :one
 DELETE FROM posts
 WHERE id = $1
-RETURNING id, url, title, content, user_id, created_at, updated_at
+RETURNING id, url, user_id, title, content, created_at, updated_at
 `
 
-type DeletePostByIdRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) DeletePostById(ctx context.Context, id pgtype.UUID) (DeletePostByIdRow, error) {
+func (q *Queries) DeletePostById(ctx context.Context, id pgtype.UUID) (Post, error) {
 	row := q.db.QueryRow(ctx, deletePostById, id)
-	var i DeletePostByIdRow
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Url,
+		&i.UserID,
 		&i.Title,
 		&i.Content,
-		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -113,30 +93,20 @@ func (q *Queries) DeletePostById(ctx context.Context, id pgtype.UUID) (DeletePos
 }
 
 const getPostById = `-- name: GetPostById :one
-SELECT id, url, title, content, user_id, created_at, updated_at
+SELECT id, url, user_id, title, content, created_at, updated_at
 FROM posts
 WHERE id = $1
 `
 
-type GetPostByIdRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) GetPostById(ctx context.Context, id pgtype.UUID) (GetPostByIdRow, error) {
+func (q *Queries) GetPostById(ctx context.Context, id pgtype.UUID) (Post, error) {
 	row := q.db.QueryRow(ctx, getPostById, id)
-	var i GetPostByIdRow
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Url,
+		&i.UserID,
 		&i.Title,
 		&i.Content,
-		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -144,30 +114,20 @@ func (q *Queries) GetPostById(ctx context.Context, id pgtype.UUID) (GetPostByIdR
 }
 
 const getPostByUrl = `-- name: GetPostByUrl :one
-SELECT id, url, title, content, user_id, created_at, updated_at
+SELECT id, url, user_id, title, content, created_at, updated_at
 FROM posts
 WHERE url = $1
 `
 
-type GetPostByUrlRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) GetPostByUrl(ctx context.Context, url pgtype.Text) (GetPostByUrlRow, error) {
+func (q *Queries) GetPostByUrl(ctx context.Context, url pgtype.Text) (Post, error) {
 	row := q.db.QueryRow(ctx, getPostByUrl, url)
-	var i GetPostByUrlRow
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Url,
+		&i.UserID,
 		&i.Title,
 		&i.Content,
-		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -175,37 +135,27 @@ func (q *Queries) GetPostByUrl(ctx context.Context, url pgtype.Text) (GetPostByU
 }
 
 const getPostsByTitle = `-- name: GetPostsByTitle :many
-SELECT id, url, title, content, user_id, created_at, updated_at
+SELECT id, url, user_id, title, content, created_at, updated_at
 FROM posts
 WHERE title ILIKE '%' || $1 || '%'
 ORDER BY created_at DESC
 `
 
-type GetPostsByTitleRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) GetPostsByTitle(ctx context.Context, dollar_1 pgtype.Text) ([]GetPostsByTitleRow, error) {
+func (q *Queries) GetPostsByTitle(ctx context.Context, dollar_1 pgtype.Text) ([]Post, error) {
 	rows, err := q.db.Query(ctx, getPostsByTitle, dollar_1)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetPostsByTitleRow
+	var items []Post
 	for rows.Next() {
-		var i GetPostsByTitleRow
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.Url,
+			&i.UserID,
 			&i.Title,
 			&i.Content,
-			&i.UserID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -220,37 +170,27 @@ func (q *Queries) GetPostsByTitle(ctx context.Context, dollar_1 pgtype.Text) ([]
 }
 
 const getPostsByUserId = `-- name: GetPostsByUserId :many
-SELECT id, url, title, content, user_id, created_at, updated_at
+SELECT id, url, user_id, title, content, created_at, updated_at
 FROM posts
 WHERE user_id = $1
 ORDER BY created_at DESC
 `
 
-type GetPostsByUserIdRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) GetPostsByUserId(ctx context.Context, userID pgtype.UUID) ([]GetPostsByUserIdRow, error) {
+func (q *Queries) GetPostsByUserId(ctx context.Context, userID pgtype.UUID) ([]Post, error) {
 	rows, err := q.db.Query(ctx, getPostsByUserId, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetPostsByUserIdRow
+	var items []Post
 	for rows.Next() {
-		var i GetPostsByUserIdRow
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.Url,
+			&i.UserID,
 			&i.Title,
 			&i.Content,
-			&i.UserID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -278,37 +218,27 @@ func (q *Queries) GetUserIdByPostId(ctx context.Context, id pgtype.UUID) (pgtype
 }
 
 const listNPosts = `-- name: ListNPosts :many
-SELECT id, url, title, content, user_id, created_at, updated_at
+SELECT id, url, user_id, title, content, created_at, updated_at
 FROM posts
 ORDER BY created_at DESC
 LIMIT $1
 `
 
-type ListNPostsRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) ListNPosts(ctx context.Context, limit int32) ([]ListNPostsRow, error) {
+func (q *Queries) ListNPosts(ctx context.Context, limit int32) ([]Post, error) {
 	rows, err := q.db.Query(ctx, listNPosts, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListNPostsRow
+	var items []Post
 	for rows.Next() {
-		var i ListNPostsRow
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.Url,
+			&i.UserID,
 			&i.Title,
 			&i.Content,
-			&i.UserID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -323,36 +253,26 @@ func (q *Queries) ListNPosts(ctx context.Context, limit int32) ([]ListNPostsRow,
 }
 
 const listPosts = `-- name: ListPosts :many
-SELECT id, url, title, content, user_id, created_at, updated_at
+SELECT id, url, user_id, title, content, created_at, updated_at
 FROM posts
 ORDER BY created_at DESC
 `
 
-type ListPostsRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) ListPosts(ctx context.Context) ([]ListPostsRow, error) {
+func (q *Queries) ListPosts(ctx context.Context) ([]Post, error) {
 	rows, err := q.db.Query(ctx, listPosts)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListPostsRow
+	var items []Post
 	for rows.Next() {
-		var i ListPostsRow
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.Url,
+			&i.UserID,
 			&i.Title,
 			&i.Content,
-			&i.UserID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -370,7 +290,7 @@ const updatePostById = `-- name: UpdatePostById :one
 UPDATE posts
 SET title = $2, content = $3, updated_at = NOW()
 WHERE id = $1
-RETURNING id, url, title, content, user_id, created_at, updated_at
+RETURNING id, url, user_id, title, content, created_at, updated_at
 `
 
 type UpdatePostByIdParams struct {
@@ -379,25 +299,15 @@ type UpdatePostByIdParams struct {
 	Content string
 }
 
-type UpdatePostByIdRow struct {
-	ID        pgtype.UUID
-	Url       pgtype.Text
-	Title     string
-	Content   string
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) UpdatePostById(ctx context.Context, arg UpdatePostByIdParams) (UpdatePostByIdRow, error) {
+func (q *Queries) UpdatePostById(ctx context.Context, arg UpdatePostByIdParams) (Post, error) {
 	row := q.db.QueryRow(ctx, updatePostById, arg.ID, arg.Title, arg.Content)
-	var i UpdatePostByIdRow
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Url,
+		&i.UserID,
 		&i.Title,
 		&i.Content,
-		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
