@@ -1,29 +1,36 @@
 package api
 
 import (
+	"mime/multipart"
+	"os"
+	"path/filepath"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
 
 // POST, "/posts", requires auth
+//requires data in form of an .mp4, title and description
+
 func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//validate and get data
-		var req struct {
-			Video   []byte `json:"video"` //whatever the actual video is
-			Title   string `json:"title"`
-			Content string `json:"content"`
+
+		//get ids
+		userId, err := ValidateUUID(c)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
-		if err := c.ShouldBindJSON(&req); err != nil {
+		id := MakeId()
+
+		//save video
+		file, err := c.FormFile("video")
+		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-
-		//create url and save the image
-		url, err := saveVideo(req.Video)
-
-		userId, err := ValidateUUID(c)
+		url, err := saveVideo(c, file, id.String())
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
@@ -31,9 +38,10 @@ func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 
 		//create post
 		params := db.CreatePostParams{}
+		params.ID = id
 		params.Url = url
-		params.Title = req.Title
-		params.Content = req.Content
+		params.Title = c.PostForm("title")
+		params.Content = c.PostForm("description")
 		params.UserID = userId
 
 		created_post, err := q.CreatePost(c, params)
@@ -41,6 +49,7 @@ func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
+
 		c.JSON(200, gin.H{"message": "post created successfully", "post": created_post})
 	}
 }
@@ -64,7 +73,18 @@ func GetAllPostsHandler(q *db.Queries) gin.HandlerFunc {
 }
 
 // the saving logic
-func saveVideo(video []byte) (pgtype.Text, error) { //returns url
-	////not immplemented!!!!
-	return pgtype.Text{}, nil
+func saveVideo(c *gin.Context, file *multipart.FileHeader, id string) (pgtype.Text, error) { //returns url
+
+	if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
+		return pgtype.Text{}, nil
+	}
+	path := filepath.Join("uploads", id+filepath.Ext(file.Filename))
+	if err := os.Rename(file.Filename, path); err != nil {
+		return pgtype.Text{}, err
+	}
+	if err := c.SaveUploadedFile(file, path); err != nil {
+		return pgtype.Text{}, err
+	}
+
+	return pgtype.Text{String: path, Valid: true}, nil
 }

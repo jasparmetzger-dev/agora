@@ -5,6 +5,36 @@ import (
 	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
 
+// GET, "posts/:id", auth required
+func GetPostMetaDataHandler(q *db.Queries) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := ValidatePostUUID(c)
+		if err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		post, err := q.GetPostById(c, id)
+		if err != nil {
+			c.JSON(401, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"post": post})
+	}
+}
+
+// GET, "posts/:id/video", auth required
+
+func GetVideoHandler(q *db.Queries) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		path, err := getPostUrl(q, c)
+		if err != nil {
+			c.JSON(404, gin.H{"error": err.Error()})
+			return
+		}
+		c.File(path)
+	}
+}
+
 // PATCH, "posts/:id", auth required
 func PatchPostHandler(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {

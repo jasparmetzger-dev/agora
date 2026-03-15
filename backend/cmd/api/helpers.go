@@ -2,9 +2,17 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/jasparmetzger-dev/agora/cmd/database"
 )
+
+func MakeId() pgtype.UUID {
+	googleId := uuid.New()
+	var id pgtype.UUID
+	id.Scan(googleId.String())
+	return id
+}
 
 //USER HELPERS
 
@@ -54,4 +62,18 @@ func MakePostFromPath(q *db.Queries, c *gin.Context) (db.Post, error, int) { //a
 		return db.Post{}, err, 500
 	}
 	return post, nil, 200
+}
+
+func getPostUrl(q *db.Queries, c *gin.Context) (string, error) {
+
+	idStr := c.Param("id")
+	id := pgtype.UUID{}
+	id.Scan(idStr)
+
+	post, err := q.GetPostById(c, id)
+	if err != nil {
+		return "", err
+	}
+	return post.Url.String, nil
+
 }

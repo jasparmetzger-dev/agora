@@ -37,12 +37,13 @@ func (q *Queries) CountPostsByUserId(ctx context.Context, userID pgtype.UUID) (i
 }
 
 const createPost = `-- name: CreatePost :one
-INSERT INTO posts (url, user_id, title, content, created_at, updated_at)
-VALUES ($1, $2, $3, $4, NOW(), NOW())
+INSERT INTO posts (id, url, user_id, title, content, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 RETURNING id, url, user_id, title, content, created_at, updated_at
 `
 
 type CreatePostParams struct {
+	ID      pgtype.UUID
 	Url     pgtype.Text
 	UserID  pgtype.UUID
 	Title   string
@@ -51,6 +52,7 @@ type CreatePostParams struct {
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
 	row := q.db.QueryRow(ctx, createPost,
+		arg.ID,
 		arg.Url,
 		arg.UserID,
 		arg.Title,
