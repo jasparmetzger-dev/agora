@@ -1,0 +1,7 @@
+.git
+.gitignore
+**/*_test.go
+**/testdata
+*.md
+.env
+.vscode
