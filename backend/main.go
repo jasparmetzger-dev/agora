@@ -23,7 +23,11 @@ func main() {
 	//init gin routing
 	var r *gin.Engine = gin.Default()
 	r.SetTrustedProxies(nil)
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
+	//auth
 	r.POST("/register", auth.RegisterHandler(q))
 	r.POST("/login", auth.LoginHandler(q))
 
