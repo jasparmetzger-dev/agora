@@ -1,2 +1,5 @@
 #env
 .env
+
+#big files
+testing_data/*
