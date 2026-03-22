@@ -25,7 +25,7 @@ func CreatePostHandler(q *db.Queries) gin.HandlerFunc {
 		id := MakeId()
 
 		//save video
-		file, err := c.FormFile("video")
+		file, err := c.FormFile("file")
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -79,9 +79,6 @@ func saveVideo(c *gin.Context, file *multipart.FileHeader, id string) (pgtype.Te
 		return pgtype.Text{}, nil
 	}
 	path := filepath.Join("uploads", id+filepath.Ext(file.Filename))
-	if err := os.Rename(file.Filename, path); err != nil {
-		return pgtype.Text{}, err
-	}
 	if err := c.SaveUploadedFile(file, path); err != nil {
 		return pgtype.Text{}, err
 	}

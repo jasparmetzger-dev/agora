@@ -23,8 +23,12 @@ func main() {
 	//init gin routing
 	var r *gin.Engine = gin.Default()
 	r.SetTrustedProxies(nil)
+
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
+	})
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
 	})
 
 	//auth
@@ -45,6 +49,7 @@ func main() {
 		authorized.PATCH("/posts/:id", api.PatchPostHandler(q))
 		authorized.DELETE("/posts/:id", api.DeletePostHandler(q))
 
+		authorized.GET("/posts/:id/video", api.GetVideoHandler(q))
 		authorized.GET("/feed", api.ShowFeedHandler(q))
 
 	}
