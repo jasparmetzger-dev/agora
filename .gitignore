@@ -1,5 +1,6 @@
 #env
 .env
+ranker/.venv
 
 #big files
 testing_data/*
